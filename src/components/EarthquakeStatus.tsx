@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { EarthquakeStatus as EarthquakeStatusType, EarthquakeFeature } from "@/types/earthquake";
 import { fetchRecentEarthquakes, determineEarthquakeState, extractLocationName, getTimeAgo } from "@/lib/api";
 import { triggerVibration } from "@/lib/vibration";
+import { useEarthquakeState } from "@/lib/EarthquakeContext";
 
 const REFRESH_INTERVAL = 30000;
 
@@ -137,6 +138,13 @@ export default function EarthquakeStatus() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastVibrated, setLastVibrated] = useState<string | null>(null);
+  const { setState: setGlobalState } = useEarthquakeState();
+
+  useEffect(() => {
+    if (status?.state) {
+      setGlobalState(status.state);
+    }
+  }, [status?.state, setGlobalState]);
 
   const fetchData = useCallback(async (isInitialLoad = false) => {
     try {
