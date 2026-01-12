@@ -57,7 +57,7 @@ export default function RootLayout({
         </div>
         <footer className="w-full flex flex-col items-center justify-center gap-2 py-5 bg-white border-t border-gray-100 mb-16 md:mb-0">
           <p className="text-xl sm:text-2xl font-bold text-black">
-            Made with <a href="https://windsurf.com" target="_blank" rel="noopener noreferrer" className="relative text-black after:absolute after:bottom-0 after:left-0 after:h-[1.5px] after:w-0 after:bg-black after:transition-all after:duration-300 hover:after:w-full">Windsurf</a>
+            Made with <a href="https://windsurf.com" target="_blank" rel="noopener noreferrer" className="relative text-green-700 after:absolute after:bottom-0 after:left-0 after:h-[1.5px] after:w-0 after:bg-green-700 after:transition-all after:duration-300 hover:after:w-full">Windsurf</a>
           </p>
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500">by Matt Bergland</span>
