@@ -58,5 +58,16 @@
   "history_scroll_loaf_blocking_ms": 0,
   "history_scroll_cls": 0,
   "history_scroll_dom_nodes": 814,
-  "history_scroll_ready_ms": 1965.9
+  "history_scroll_ready_ms": 1965.9,
+  "leaderboard_load_duration_ms": 3109.1,
+  "leaderboard_load_frame_count": 154,
+  "leaderboard_load_dropped_count": 1,
+  "leaderboard_load_dropped_pct": 0.6494,
+  "leaderboard_load_p95_frame_ms": 16.8,
+  "leaderboard_load_max_frame_ms": 100,
+  "leaderboard_load_loaf_ms": 559.1,
+  "leaderboard_load_loaf_blocking_ms": 65.4,
+  "leaderboard_load_cls": 0.0897,
+  "leaderboard_load_ready_ms": 1754.1,
+  "leaderboard_load_dom_nodes": 218
 }

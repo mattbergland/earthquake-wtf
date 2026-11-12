@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // npm run build && npm run smooth; SMOOTH_URL targets an existing server.
 // SMOOTH_RUNS=5 SMOOTH_OUT=results.json SMOOTH_BASELINE=before.json npm run smooth
+// SMOOTH_SCENARIOS=leaderboard_load runs only the cold leaderboard scenario.
 import { chromium } from "playwright-core";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
@@ -8,6 +9,8 @@ import fs from "node:fs";
 const runs = Number(process.env.SMOOTH_RUNS ?? 5);
 const out = process.env.SMOOTH_OUT ?? "smooth-results.json";
 let base = process.env.SMOOTH_URL;
+const scenarioNames = ["load_transition", "bubble_idle", "history_scroll", "nav_history", "nav_leaderboard", "nav_status", "leaderboard_load"];
+const selected = new Set((process.env.SMOOTH_SCENARIOS ?? scenarioNames.join(",")).split(","));
 const ready = {
   "/": () => [...document.querySelectorAll("h1")].some(h => /^(YES|NO|MAYBE|UNKNOWN)\.?$/.test(h.textContent.trim()) && h.getBoundingClientRect().height > 0),
   "/history": () => (document.querySelector("main")?.innerText ?? "").includes("earthquakes in the Bay Area over the last 30 days"),
@@ -127,8 +130,24 @@ async function historyScenario(browser) {
   } finally { await context.close(); }
 }
 
+async function leaderboardScenario(browser) {
+  const { context, page } = await newPage(browser);
+  try {
+    await page.goto(base + "/leaderboard", { waitUntil: "commit" });
+    const commit = await page.evaluate(() => performance.getEntriesByType("navigation")[0].responseStart);
+    const readyMs = await waitReady(page, "/leaderboard");
+    await page.waitForTimeout(1500);
+    return {
+      ...await sample(page, commit),
+      ready_ms: readyMs,
+      dom_nodes: await page.evaluate(() => document.getElementsByTagName("*").length),
+    };
+  } finally { await context.close(); }
+}
+
 async function main() {
   if (!Number.isInteger(runs) || runs < 1) throw new Error("SMOOTH_RUNS must be a positive integer");
+  if ([...selected].some(name => !scenarioNames.includes(name))) throw new Error("Unknown SMOOTH_SCENARIOS selection");
   let server, browser;
   const raw = {};
   try {
@@ -144,8 +163,12 @@ async function main() {
     }
     browser = await chromium.launch({ headless: true });
     for (let i = 0; i < runs; i++) {
-      const scenarios = { ...await statusScenarios(browser), history_scroll: await historyScenario(browser) };
+      const scenarios = {};
+      if (["load_transition", "bubble_idle", "nav_history", "nav_leaderboard", "nav_status"].some(name => selected.has(name))) Object.assign(scenarios, await statusScenarios(browser));
+      if (selected.has("history_scroll")) scenarios.history_scroll = await historyScenario(browser);
+      if (selected.has("leaderboard_load")) scenarios.leaderboard_load = await leaderboardScenario(browser);
       for (const [scenario, metrics] of Object.entries(scenarios)) {
+        if (!selected.has(scenario)) continue;
         for (const [metric, value] of Object.entries(metrics)) (raw[`${scenario}_${metric}`] ??= []).push(value);
       }
       process.stderr.write(`smooth run ${i + 1}/${runs} done\n`);
@@ -156,7 +179,7 @@ async function main() {
   }
   const results = Object.fromEntries(Object.entries(raw).map(([key, values]) => [key, Number(median(values).toFixed(4))]));
   fs.writeFileSync(out, JSON.stringify(results, null, 2) + "\n");
-  console.table(Object.fromEntries(["load_transition", "bubble_idle", "history_scroll", "nav_history", "nav_leaderboard", "nav_status"].map(s => [s, Object.fromEntries(["dropped_pct", "dropped_count", "p95_frame_ms", "max_frame_ms", "loaf_ms", "loaf_blocking_ms", "cls"].map(k => [k, results[`${s}_${k}`]]))])));
+  console.table(Object.fromEntries(scenarioNames.filter(s => selected.has(s)).map(s => [s, Object.fromEntries(["dropped_pct", "dropped_count", "p95_frame_ms", "max_frame_ms", "loaf_ms", "loaf_blocking_ms", "cls"].map(k => [k, results[`${s}_${k}`]]))])));
   console.log(JSON.stringify(results, null, 2));
   if (process.env.SMOOTH_BASELINE) {
     const before = JSON.parse(fs.readFileSync(process.env.SMOOTH_BASELINE, "utf8"));
