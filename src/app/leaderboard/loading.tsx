@@ -1,4 +1,4 @@
-import { Trophy } from "lucide-react";
+import { Trophy } from "@/components/icons";
 
 export default function LeaderboardLoading() {
   return (
