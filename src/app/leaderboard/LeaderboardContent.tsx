@@ -1,7 +1,7 @@
 "use client";
 
 import type { LocationStats } from "@/lib/history-data";
-import { Trophy, TrendingUp, MapPin } from "lucide-react";
+import { Trophy, TrendingUp, MapPin } from "@/components/icons";
 
 export default function LeaderboardContent({ leaderboard, total, error }: { leaderboard: LocationStats[]; total: number; error: string | null }) {
   if (error) {
