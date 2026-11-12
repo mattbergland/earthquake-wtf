@@ -132,9 +132,17 @@ function LoadingState() {
   );
 }
 
-export default function EarthquakeStatus() {
-  const [status, setStatus] = useState<EarthquakeStatusType | null>(null);
-  const [loading, setLoading] = useState(true);
+let latestClientStatus: EarthquakeStatusType | null = null;
+
+function pickFreshest(a: EarthquakeStatusType | null, b: EarthquakeStatusType | null) {
+  if (!a) return b;
+  if (!b) return a;
+  return new Date(a.lastUpdated).getTime() >= new Date(b.lastUpdated).getTime() ? a : b;
+}
+
+export default function EarthquakeStatus({ initialStatus = null }: { initialStatus?: EarthquakeStatusType | null }) {
+  const [status, setStatus] = useState<EarthquakeStatusType | null>(() => pickFreshest(latestClientStatus, initialStatus));
+  const [loading, setLoading] = useState(() => !pickFreshest(latestClientStatus, initialStatus));
   const [error, setError] = useState<string | null>(null);
   const [lastVibrated, setLastVibrated] = useState<string | null>(null);
 
@@ -143,6 +151,7 @@ export default function EarthquakeStatus() {
       const earthquakes = await fetchRecentEarthquakes(10);
       const newStatus = determineEarthquakeState(earthquakes);
 
+      latestClientStatus = newStatus;
       setStatus(newStatus);
       setError(null);
 
@@ -229,7 +238,7 @@ function YesState({ earthquake }: { earthquake: EarthquakeFeature }) {
         <span className="mx-2">—</span>
         <span>{location}</span>
       </p>
-      <p className="mt-2 text-lg text-gray-500 animate-slide-up-fade" style={{ animationDelay: "300ms", animationFillMode: "both" }}>{timeAgo}</p>
+      <p className="mt-2 text-lg text-gray-500 animate-slide-up-fade" style={{ animationDelay: "300ms", animationFillMode: "both" }} suppressHydrationWarning>{timeAgo}</p>
     </div>
   );
 }
@@ -248,7 +257,7 @@ function MaybeState({ earthquake }: { earthquake: EarthquakeFeature }) {
         <span className="mx-2">—</span>
         <span>{location}</span>
       </p>
-      <p className="mt-2 text-lg text-gray-500 animate-slide-up-fade" style={{ animationDelay: "300ms", animationFillMode: "both" }}>{timeAgo}</p>
+      <p className="mt-2 text-lg text-gray-500 animate-slide-up-fade" style={{ animationDelay: "300ms", animationFillMode: "both" }} suppressHydrationWarning>{timeAgo}</p>
       <p className="mt-4 text-sm text-gray-400 animate-slide-up-fade" style={{ animationDelay: "450ms", animationFillMode: "both" }}>
         Small quake detected, but you might not have felt it.
       </p>
@@ -287,7 +296,7 @@ function RecentQuakesList({ quakes }: { quakes: EarthquakeFeature[] }) {
             <span className="text-sm text-gray-600">
               M{quake.properties.mag.toFixed(1)} — {extractLocationName(quake.properties.place)}
             </span>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-400" suppressHydrationWarning>
               {getTimeAgo(quake.properties.time)}
             </span>
           </div>
