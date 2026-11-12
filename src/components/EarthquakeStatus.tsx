@@ -4,64 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import { EarthquakeStatus as EarthquakeStatusType, EarthquakeFeature } from "@/types/earthquake";
 import { fetchRecentEarthquakes, determineEarthquakeState, extractLocationName, getTimeAgo } from "@/lib/api";
 import { triggerVibration } from "@/lib/vibration";
+import AnimatedLogo from "@/components/AnimatedLogo";
 
 const REFRESH_INTERVAL = 30000;
-
-function AnimatedLogo() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  
-  const messages = [
-    { text: "wait... was that an earthquake?", domain: ".wtf" },
-    { text: "lmao the ground just moved", domain: ".lol" },
-    { text: "umm... did you feel that too?", domain: ".wtf" },
-    { text: "my plants are SHAKING", domain: ".lol" },
-    { text: "bro my whole desk just vibrated", domain: ".wtf" },
-    { text: "the cat knows something we don't", domain: ".lol" },
-    { text: "was that a truck or...?", domain: ".wtf" },
-    { text: "ok that was NOT just me", domain: ".lol" },
-    { text: "my water glass is doing the jurassic park thing", domain: ".wtf" },
-    { text: "should i be under a doorframe rn", domain: ".lol" },
-    { text: "the chandelier is swinging 👀", domain: ".wtf" },
-    { text: "california moment™", domain: ".lol" },
-    { text: "felt that from my overpriced studio", domain: ".wtf" },
-    { text: "the hayward fault said hello", domain: ".lol" },
-    { text: "my oat milk latte is vibrating", domain: ".wtf" },
-    { text: "even the tech bros felt that one", domain: ".lol" },
-    { text: "shook harder than BART at rush hour", domain: ".wtf" },
-    { text: "my rent is too high for this", domain: ".lol" },
-  ];
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % messages.length);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, [messages.length]);
-
-  const current = messages[currentIndex];
-  const isLol = current.domain === ".lol";
-
-  return (
-    <div className="text-center mb-8">
-      <div className="inline-block" key={currentIndex}>
-        <div 
-          className={`px-6 py-3 rounded-2xl rounded-br-md text-lg font-medium shadow-lg animate-bubble-in hover:scale-105 transition-transform duration-200 ${
-            isLol 
-              ? "bg-gradient-to-br from-green-400 to-green-600 text-white" 
-              : "bg-gradient-to-br from-blue-400 to-blue-600 text-white"
-          }`}
-        >
-          {current.text}
-        </div>
-        <div className="mt-2 text-right opacity-0 animate-fade-in" style={{ animationDelay: "300ms", animationFillMode: "forwards" }}>
-          <span className="text-sm text-gray-400">
-            earthquake<span className={`font-semibold ${isLol ? "text-green-500" : "text-blue-500"}`}>{current.domain}</span>
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const LOADING_MESSAGES = [
   "yo was that an earthquake?",
@@ -100,22 +45,24 @@ function LoadingState() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+    <div className="w-full flex flex-col items-center justify-center min-h-[60vh] px-4">
       <div className="w-full max-w-sm space-y-3 mb-8">
-        {visibleMessages.map((msgIndex, i) => (
+        {Array.from({ length: 5 }, (_, i) => (
           <div
-            key={`msg-${i}-${msgIndex}`}
-            className={`animate-fade-in ${i % 2 === 0 ? "text-right" : "text-left"}`}
+            key={i}
+            className={`h-15 flex items-start ${i % 2 === 0 ? "justify-end" : "justify-start"}`}
           >
+            {visibleMessages[i] !== undefined && (
             <span
-              className={`inline-block px-4 py-2.5 rounded-2xl text-sm shadow-sm ${
+              className={`inline-block animate-fade-in px-4 py-2.5 rounded-2xl text-sm shadow-sm ${
                 i % 2 === 0
                   ? "bg-gray-100 text-gray-500 rounded-br-md"
                   : "bg-gray-100 text-gray-500 rounded-bl-md"
               }`}
             >
-              {LOADING_MESSAGES[msgIndex]}
+              {LOADING_MESSAGES[visibleMessages[i]]}
             </span>
+            )}
           </div>
         ))}
       </div>
@@ -188,12 +135,12 @@ export default function EarthquakeStatus({ initialStatus = null }: { initialStat
 
   if (error || status?.state === "error") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+      <div className="w-full flex flex-col items-center justify-center min-h-[60vh]">
         <h1 className="text-6xl md:text-8xl font-bold text-gray-400">UNKNOWN</h1>
         <p className="mt-4 text-gray-500 text-lg">USGS not responding.</p>
         <button
           onClick={() => fetchData()}
-          className="mt-6 px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
+          className="mt-6 px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-transform duration-150 motion-safe:active:scale-[0.98]"
         >
           Try again
         </button>
@@ -202,7 +149,7 @@ export default function EarthquakeStatus({ initialStatus = null }: { initialStat
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+    <div className="w-full flex flex-col items-center justify-center min-h-[60vh] px-4">
       <AnimatedLogo />
       
       {status?.state === "yes" && status.earthquake && (
