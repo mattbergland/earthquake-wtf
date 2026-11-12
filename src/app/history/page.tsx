@@ -28,10 +28,13 @@ export default function HistoryPage() {
     return (
       <main className="flex-1 pb-20 md:pb-0">
         <div className="max-w-2xl mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">History</h1>
-          <div className="animate-pulse space-y-4">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">History</h1>
+          <p aria-hidden="true" className="invisible text-gray-500 mb-6">
+            0 earthquakes in the Bay Area over the past 30 days
+          </p>
+          <div className="animate-pulse space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-100 rounded-lg" />
+              <div key={i} className="h-[98px] bg-gray-100 rounded-lg" />
             ))}
           </div>
         </div>
@@ -89,7 +92,8 @@ function EarthquakeCard({ earthquake }: { earthquake: EarthquakeFeature }) {
       href={earthquake.properties.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="block p-4 bg-white border border-gray-100 rounded-lg hover:border-gray-200 hover:shadow-sm transition-all"
+      className="block p-4 bg-white border border-gray-100 rounded-lg hover:border-gray-200 hover:shadow-sm transition-[border-color,box-shadow]"
+      style={{ contentVisibility: "auto", containIntrinsicSize: "auto 64px" }}
     >
       <div className="flex items-start gap-4">
         <div
