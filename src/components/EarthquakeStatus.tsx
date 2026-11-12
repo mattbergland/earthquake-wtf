@@ -45,22 +45,24 @@ function LoadingState() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+    <div className="w-full flex flex-col items-center justify-center min-h-[60vh] px-4">
       <div className="w-full max-w-sm space-y-3 mb-8">
-        {visibleMessages.map((msgIndex, i) => (
+        {Array.from({ length: 5 }, (_, i) => (
           <div
-            key={`msg-${i}-${msgIndex}`}
-            className={`animate-fade-in ${i % 2 === 0 ? "text-right" : "text-left"}`}
+            key={i}
+            className={`h-15 flex items-start ${i % 2 === 0 ? "justify-end" : "justify-start"}`}
           >
+            {visibleMessages[i] !== undefined && (
             <span
-              className={`inline-block px-4 py-2.5 rounded-2xl text-sm shadow-sm ${
+              className={`inline-block animate-fade-in px-4 py-2.5 rounded-2xl text-sm shadow-sm ${
                 i % 2 === 0
                   ? "bg-gray-100 text-gray-500 rounded-br-md"
                   : "bg-gray-100 text-gray-500 rounded-bl-md"
               }`}
             >
-              {LOADING_MESSAGES[msgIndex]}
+              {LOADING_MESSAGES[visibleMessages[i]]}
             </span>
+            )}
           </div>
         ))}
       </div>
@@ -129,7 +131,7 @@ export default function EarthquakeStatus() {
 
   if (error || status?.state === "error") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+      <div className="w-full flex flex-col items-center justify-center min-h-[60vh]">
         <h1 className="text-6xl md:text-8xl font-bold text-gray-400">UNKNOWN</h1>
         <p className="mt-4 text-gray-500 text-lg">USGS not responding.</p>
         <button
@@ -143,7 +145,7 @@ export default function EarthquakeStatus() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+    <div className="w-full flex flex-col items-center justify-center min-h-[60vh] px-4">
       <AnimatedLogo />
       
       {status?.state === "yes" && status.earthquake && (
