@@ -163,7 +163,7 @@ export default function EarthquakeStatus({ initialStatus = null }: { initialStat
         triggerVibration(newStatus.state);
         setLastVibrated(newStatus.earthquake.id);
       }
-    } catch (err) {
+    } catch {
       setError("Unable to reach USGS. Please try again.");
       setStatus({
         state: "error",
