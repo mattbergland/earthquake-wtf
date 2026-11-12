@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { EarthquakeStatus as EarthquakeStatusType, EarthquakeFeature } from "@/types/earthquake";
-import { fetchRecentEarthquakes, determineEarthquakeState, extractLocationName, getTimeAgo } from "@/lib/api";
-import { triggerVibration } from "@/lib/vibration";
-
-const REFRESH_INTERVAL = 30000;
+import { useEffect, useState } from "react";
+import { EarthquakeFeature } from "@/types/earthquake";
+import { extractLocationName, getTimeAgo } from "@/lib/api";
+import { useEarthquakeStatus } from "@/lib/useEarthquakeStatus";
 
 function AnimatedLogo() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -133,50 +131,7 @@ function LoadingState() {
 }
 
 export default function EarthquakeStatus() {
-  const [status, setStatus] = useState<EarthquakeStatusType | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [lastVibrated, setLastVibrated] = useState<string | null>(null);
-
-  const fetchData = useCallback(async (isInitialLoad = false) => {
-    try {
-      const earthquakes = await fetchRecentEarthquakes(10);
-      const newStatus = determineEarthquakeState(earthquakes);
-      
-      // Show loading animation for at least 2.5s on initial load
-      if (isInitialLoad) {
-        await new Promise((resolve) => setTimeout(resolve, 2500));
-      }
-      
-      setStatus(newStatus);
-      setError(null);
-
-      if (
-        newStatus.earthquake &&
-        newStatus.earthquake.id !== lastVibrated &&
-        (newStatus.state === "yes" || newStatus.state === "maybe")
-      ) {
-        triggerVibration(newStatus.state);
-        setLastVibrated(newStatus.earthquake.id);
-      }
-    } catch (err) {
-      setError("Unable to reach USGS. Please try again.");
-      setStatus({
-        state: "error",
-        earthquake: null,
-        recentQuakes: [],
-        lastUpdated: new Date(),
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [lastVibrated]);
-
-  useEffect(() => {
-    fetchData(true);
-    const interval = setInterval(() => fetchData(false), REFRESH_INTERVAL);
-    return () => clearInterval(interval);
-  }, [fetchData]);
+  const { status, loading, error, retry } = useEarthquakeStatus();
 
   if (loading) {
     return <LoadingState />;
@@ -188,7 +143,7 @@ export default function EarthquakeStatus() {
         <h1 className="text-6xl md:text-8xl font-bold text-gray-400">UNKNOWN</h1>
         <p className="mt-4 text-gray-500 text-lg">USGS not responding.</p>
         <button
-          onClick={() => fetchData(false)}
+          onClick={retry}
           className="mt-6 px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
         >
           Try again
