@@ -79,3 +79,46 @@ export function useQuakes(key: QuakeKey): QuakeEntry | undefined {
 
   return entry;
 }
+
+const ROUTE_KEYS: Record<string, QuakeKey> = {
+  "/": "recent",
+  "/history": "last30Days",
+  "/leaderboard": "last30Days",
+};
+
+export function prefetchQuakesForRoute(href: string) {
+  const key = ROUTE_KEYS[href];
+  if (key) prefetchQuakes(key);
+}
+
+type IdleWindow = Window & {
+  requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+  cancelIdleCallback?: (id: number) => void;
+};
+
+/** Once the current page's own requests settle, warm the data for every tab while idle. */
+export function usePrefetchAllQuakesWhenIdle() {
+  useEffect(() => {
+    const w = window as IdleWindow;
+    const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (conn?.saveData) return;
+    let cancelled = false;
+    const run = async () => {
+      await Promise.allSettled([...inflight.values()]);
+      if (cancelled) return;
+      (Object.keys(sources) as QuakeKey[]).forEach(prefetchQuakes);
+    };
+    if (w.requestIdleCallback) {
+      const id = w.requestIdleCallback(run, { timeout: 2000 });
+      return () => {
+        cancelled = true;
+        w.cancelIdleCallback?.(id);
+      };
+    }
+    const id = setTimeout(run, 200);
+    return () => {
+      cancelled = true;
+      clearTimeout(id);
+    };
+  }, []);
+}
