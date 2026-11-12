@@ -9,6 +9,7 @@
 import { chromium } from "playwright-core";
 import { spawn, execSync } from "node:child_process";
 import fs from "node:fs";
+import path from "node:path";
 
 const RUNS = Number(process.env.BENCH_RUNS ?? 5);
 const PORT = 3123;
@@ -162,8 +163,9 @@ async function main() {
     if (server) try { process.kill(-server.pid); } catch {}
   }
   const results = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, Math.round(median(v) * 10) / 10]));
-  fs.writeFileSync(OUT, JSON.stringify(results, null, 2));
   console.log(JSON.stringify(results, null, 2));
+  fs.mkdirSync(path.dirname(path.resolve(OUT)), { recursive: true });
+  fs.writeFileSync(OUT, JSON.stringify(results, null, 2));
 
   if (process.env.BENCH_BASELINE) {
     const base = JSON.parse(fs.readFileSync(process.env.BENCH_BASELINE, "utf8"));
