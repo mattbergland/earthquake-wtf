@@ -1,28 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { EarthquakeFeature } from "@/types/earthquake";
-import { fetchEarthquakesLast30Days, extractLocationName } from "@/lib/api";
+import { extractLocationName } from "@/lib/api";
+import { useQuakes } from "@/lib/quakeCache";
 import { format } from "date-fns";
 
-export default function HistoryPage() {
-  const [earthquakes, setEarthquakes] = useState<EarthquakeFeature[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const EMPTY: EarthquakeFeature[] = [];
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const data = await fetchEarthquakesLast30Days();
-        setEarthquakes(data);
-      } catch (err) {
-        setError("Failed to load earthquake history.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
+export default function HistoryPage() {
+  const entry = useQuakes("last30Days");
+  const earthquakes = entry?.data ?? EMPTY;
+  const loading = !entry;
+  const error = entry?.error && !entry.data ? "Failed to load earthquake history." : null;
 
   if (loading) {
     return (

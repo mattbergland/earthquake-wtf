@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import { EarthquakeFeature } from "@/types/earthquake";
-import { fetchEarthquakesLast30Days, extractLocationName } from "@/lib/api";
+import { extractLocationName } from "@/lib/api";
+import { useQuakes } from "@/lib/quakeCache";
 import { Trophy, TrendingUp, MapPin } from "lucide-react";
+
+const EMPTY: EarthquakeFeature[] = [];
 
 interface LocationStats {
   location: string;
@@ -13,23 +16,10 @@ interface LocationStats {
 }
 
 export default function LeaderboardPage() {
-  const [earthquakes, setEarthquakes] = useState<EarthquakeFeature[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const data = await fetchEarthquakesLast30Days();
-        setEarthquakes(data);
-      } catch (err) {
-        setError("Failed to load earthquake data.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
+  const entry = useQuakes("last30Days");
+  const earthquakes = entry?.data ?? EMPTY;
+  const loading = !entry;
+  const error = entry?.error && !entry.data ? "Failed to load earthquake data." : null;
 
   const leaderboard = useMemo(() => {
     const locationMap = new Map<string, LocationStats>();
