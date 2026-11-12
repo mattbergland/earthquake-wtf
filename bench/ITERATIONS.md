@@ -28,3 +28,30 @@ cards with unchanged document height (mobile 10419px, desktop 10308px), no
 blank skipped content. Mocked empty and API-error history states render their
 original messages. Visual changes are limited to reserved loading/rotation
 space; copy, palette, rounded cards, and bouncy animation are retained.
+
+## Final load-speed guardrail
+
+Ran the requested three-run benchmark once with Lighthouse disabled.
+Composite: **1.011**. Idle jank and LoAF remain 0. Status ready 4358.3 →
+4176.1ms; history ready 2149.1 → 1761.3ms; JS 481.6 → 482.2KB.
+History nav 551.2 → 602.5ms; leaderboard nav 385.1 → 572.8ms (1.49×),
+so the run is not an across-the-board load-speed improvement.
+
+Investigated the leaderboard flag without changing application code:
+five live-response pairs toggling history card content visibility showed
+both fast (~340–392ms) and slow (~855–898ms) transitions; the slow class
+also occurred with containment disabled. Slow transitions had USGS TTFB
+~368–388ms rather than ~153–158ms. This demonstrates upstream timing
+variation, but does not by itself exclude an additional rendering cost.
+A second five-pair diagnostic served the same captured USGS response with
+the same 150ms delay, alternating order, under the same CPU/network
+emulation. Median leaderboard ready: **355ms with containment vs 357ms
+without**. Kept iteration 3: no material containment-induced regression
+was reproduced under controlled data. This diagnostic is not a replacement
+for the live-data benchmark, whose 1.49× result remains reported.
+
+All iteration builds and five-run smoothness batches completed. Lint ran
+before every commit: 0 errors, the same three pre-existing unused `err`
+warnings. No API, fetch/loading timing, readiness strings, navigation
+labels, or `scripts/bench.mjs` changes. Only the two approved baseline JSON
+files are committed; candidate JSON and screenshots remain local.
