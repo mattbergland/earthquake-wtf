@@ -136,7 +136,7 @@ export default function EarthquakeStatus() {
         <p className="mt-4 text-gray-500 text-lg">USGS not responding.</p>
         <button
           onClick={() => fetchData(false)}
-          className="mt-6 px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
+          className="mt-6 px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-transform duration-150 motion-safe:active:scale-[0.98]"
         >
           Try again
         </button>

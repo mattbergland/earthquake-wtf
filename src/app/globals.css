@@ -16,6 +16,12 @@ body {
   color: var(--foreground);
 }
 
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

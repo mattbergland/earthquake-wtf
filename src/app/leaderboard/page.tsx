@@ -140,7 +140,7 @@ function LeaderboardCard({ item, rank }: { item: LocationStats; rank: number }) 
   };
 
   return (
-    <div className="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-lg">
+    <div className="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-lg transition-transform duration-150 motion-safe:active:scale-[0.98]">
       <div
         className={`flex-shrink-0 w-10 h-10 ${getRankStyle(rank)} rounded-full flex items-center justify-center font-bold`}
       >

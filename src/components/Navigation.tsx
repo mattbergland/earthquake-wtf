@@ -35,7 +35,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className={`text-sm font-medium transition-colors ${
+      className={`inline-block text-sm font-medium transition-transform duration-150 motion-safe:active:scale-[0.98] ${
         active
           ? "text-gray-900"
           : "text-gray-400 hover:text-gray-600"

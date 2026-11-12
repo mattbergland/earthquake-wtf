@@ -92,7 +92,7 @@ function EarthquakeCard({ earthquake }: { earthquake: EarthquakeFeature }) {
       href={earthquake.properties.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="block p-4 bg-white border border-gray-100 rounded-lg hover:border-gray-200 hover:shadow-sm transition-[border-color,box-shadow]"
+      className="block p-4 bg-white border border-gray-100 rounded-lg hover:border-gray-200 hover:shadow-sm transition-transform duration-150 motion-safe:active:scale-[0.98]"
       style={{ contentVisibility: "auto", containIntrinsicSize: "auto 64px" }}
     >
       <div className="flex items-start gap-4">
