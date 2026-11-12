@@ -7,6 +7,11 @@ import { usePathname } from "next/navigation";
 export default function Navigation() {
   const pathname = usePathname();
   const [pending, setPending] = useState<{ href: string; from: string } | null>(null);
+  const [lastPath, setLastPath] = useState(pathname);
+  if (lastPath !== pathname) {
+    setLastPath(pathname);
+    setPending(null);
+  }
   // Highlight the tapped tab immediately, before the route commits.
   const current = pending && pending.from === pathname ? pending.href : pathname;
   const select = (href: string) => setPending({ href, from: pathname });
