@@ -58,6 +58,7 @@ export function loadQuakes(key: QuakeKey, { force = false } = {}): Promise<Earth
     }
   );
   inflight.set(key, request);
+  listeners.forEach((l) => l());
   return request;
 }
 
@@ -65,11 +66,19 @@ export function prefetchQuakes(key: QuakeKey) {
   loadQuakes(key).catch(() => {});
 }
 
-/** Cached entry for `key` (undefined until first load); revalidates on mount if stale. */
+// Undefined while there is no data yet and a request is still in flight, so a
+// failed earlier attempt (e.g. a background prefetch) doesn't flash an error
+// while it is being retried.
+function snapshot(key: QuakeKey): QuakeEntry | undefined {
+  const entry = entries.get(key);
+  return !entry?.data && inflight.has(key) ? undefined : entry;
+}
+
+/** Cached entry for `key` (undefined until data or a final error); revalidates on mount if stale. */
 export function useQuakes(key: QuakeKey): QuakeEntry | undefined {
   const entry = useSyncExternalStore(
     subscribe,
-    () => entries.get(key),
+    () => snapshot(key),
     () => undefined
   );
 
