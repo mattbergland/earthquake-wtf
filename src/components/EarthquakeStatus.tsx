@@ -138,16 +138,11 @@ export default function EarthquakeStatus() {
   const [error, setError] = useState<string | null>(null);
   const [lastVibrated, setLastVibrated] = useState<string | null>(null);
 
-  const fetchData = useCallback(async (isInitialLoad = false) => {
+  const fetchData = useCallback(async () => {
     try {
       const earthquakes = await fetchRecentEarthquakes(10);
       const newStatus = determineEarthquakeState(earthquakes);
-      
-      // Show loading animation for at least 2.5s on initial load
-      if (isInitialLoad) {
-        await new Promise((resolve) => setTimeout(resolve, 2500));
-      }
-      
+
       setStatus(newStatus);
       setError(null);
 
@@ -173,8 +168,8 @@ export default function EarthquakeStatus() {
   }, [lastVibrated]);
 
   useEffect(() => {
-    fetchData(true);
-    const interval = setInterval(() => fetchData(false), REFRESH_INTERVAL);
+    fetchData();
+    const interval = setInterval(() => fetchData(), REFRESH_INTERVAL);
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -188,7 +183,7 @@ export default function EarthquakeStatus() {
         <h1 className="text-6xl md:text-8xl font-bold text-gray-400">UNKNOWN</h1>
         <p className="mt-4 text-gray-500 text-lg">USGS not responding.</p>
         <button
-          onClick={() => fetchData(false)}
+          onClick={() => fetchData()}
           className="mt-6 px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
         >
           Try again
