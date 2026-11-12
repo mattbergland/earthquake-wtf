@@ -80,7 +80,7 @@ Old-base baseline filenames are deliberately not included in this branch.
 
 | Iteration | Change | Key metrics / verification | Decision |
 | --- | --- | --- | --- |
-| C1 | Port lane changes, resolving page conflicts into the combined HistoryContent/LeaderboardContent and loading files; preserve SSR, freshest-status selection, fetching, optimistic navigation and revalidation | Idle CLS 0.0047 → 0, idle dropped 0.1517% → 0; history-nav LoAF 70.5 → 0ms; cold status CLS 0.0223 → 0.0098. Bench jank 0.9 → 0.9%, LoAF 595.8 → 628.9ms, composite 1.062 (readiness/nav timing regression flag, awaiting final batch). | Port retained for stability/accessibility. Does not solve the new startup guardrail; no animation-performance claim for startup. |
+| C1 | Port lane changes, resolving page conflicts into the combined HistoryContent/LeaderboardContent and loading files; preserve SSR, freshest-status selection, fetching, optimistic navigation and revalidation | Final idle CLS 0.0047 → 0, idle dropped 0.1517% → 0, idle task 294.987 → 242.859ms; history-nav LoAF 70.5 → 0ms; cold status CLS 0.0223 → 0.0098. Initial composite 1.062, final 1.005 (approximately baseline); status ready 205.5 → 211.4ms, FCP 644 → 644ms. Final bench jank 0.9 → 0.9%, LoAF 595.8 → 686.4ms (port batch 628.9ms). | Port retained for stability/accessibility. Startup target remains unresolved; LoAF regression flag is not dismissed. No speculative bubble tweak kept because all-animation-off disproof retains startup LoAF. |
 
 ### Post-ready attribution and disproof check
 
