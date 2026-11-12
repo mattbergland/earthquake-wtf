@@ -74,7 +74,8 @@ async function coldLoad(browser, path) {
     return { fcp };
   });
   await ctx.close();
-  return { readyMs: t, fcp: vitals.fcp, jsKB: jsBytes / 1024 };
+  // Content only counts as ready once it has also been painted.
+  return { readyMs: t < 0 ? t : Math.max(t, vitals.fcp), fcp: vitals.fcp, jsKB: jsBytes / 1024 };
 }
 
 // Client-side navigation: click nav link -> destination content visible. Also records janky frames.
@@ -97,11 +98,13 @@ async function clientNav(browser) {
   return res;
 }
 
-// Smoothness: sample rAF frame deltas on "/" for 8s after it is ready (covers rotating bubble animation).
+// Smoothness: sample rAF frame deltas on "/" for 8s once it is ready and loaded (steady-state
+// bubble animation; bootstrap/hydration cost is covered by TBT).
 async function smoothness(browser) {
   const { ctx, page } = await newThrottledPage(browser);
-  await page.goto(BASE + "/", { waitUntil: "commit" });
+  await page.goto(BASE + "/", { waitUntil: "load" });
   await timeToReady(page, READY["/"]);
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
   const r = await page.evaluate(() => new Promise((resolve) => {
     const deltas = []; let last = performance.now(); const end = last + 8000;
     let loaf = 0;
