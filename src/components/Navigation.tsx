@@ -8,6 +8,8 @@ import { prefetchQuakesForRoute, usePrefetchAllQuakesWhenIdle } from "@/lib/quak
 export default function Navigation() {
   const pathname = usePathname();
   const [pending, setPending] = useState<{ href: string; from: string } | null>(null);
+  // Any route change (including browser Back/Forward) settles the pending tab.
+  if (pending && pending.from !== pathname) setPending(null);
   // Highlight the tapped tab immediately, before the route commits.
   const current = pending && pending.from === pathname ? pending.href : pathname;
   const select = (href: string) => setPending({ href, from: pathname });
