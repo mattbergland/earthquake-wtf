@@ -132,22 +132,26 @@ function LoadingState() {
   );
 }
 
-export default function EarthquakeStatus() {
-  const [status, setStatus] = useState<EarthquakeStatusType | null>(null);
-  const [loading, setLoading] = useState(true);
+let latestClientStatus: EarthquakeStatusType | null = null;
+
+function pickFreshest(a: EarthquakeStatusType | null, b: EarthquakeStatusType | null) {
+  if (!a) return b;
+  if (!b) return a;
+  return new Date(a.lastUpdated).getTime() >= new Date(b.lastUpdated).getTime() ? a : b;
+}
+
+export default function EarthquakeStatus({ initialStatus = null }: { initialStatus?: EarthquakeStatusType | null }) {
+  const [status, setStatus] = useState<EarthquakeStatusType | null>(() => pickFreshest(latestClientStatus, initialStatus));
+  const [loading, setLoading] = useState(() => !pickFreshest(latestClientStatus, initialStatus));
   const [error, setError] = useState<string | null>(null);
   const [lastVibrated, setLastVibrated] = useState<string | null>(null);
 
-  const fetchData = useCallback(async (isInitialLoad = false) => {
+  const fetchData = useCallback(async () => {
     try {
       const earthquakes = await fetchRecentEarthquakes(10);
       const newStatus = determineEarthquakeState(earthquakes);
-      
-      // Show loading animation for at least 2.5s on initial load
-      if (isInitialLoad) {
-        await new Promise((resolve) => setTimeout(resolve, 2500));
-      }
-      
+
+      latestClientStatus = newStatus;
       setStatus(newStatus);
       setError(null);
 
@@ -173,8 +177,8 @@ export default function EarthquakeStatus() {
   }, [lastVibrated]);
 
   useEffect(() => {
-    fetchData(true);
-    const interval = setInterval(() => fetchData(false), REFRESH_INTERVAL);
+    fetchData();
+    const interval = setInterval(() => fetchData(), REFRESH_INTERVAL);
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -188,7 +192,7 @@ export default function EarthquakeStatus() {
         <h1 className="text-6xl md:text-8xl font-bold text-gray-400">UNKNOWN</h1>
         <p className="mt-4 text-gray-500 text-lg">USGS not responding.</p>
         <button
-          onClick={() => fetchData(false)}
+          onClick={() => fetchData()}
           className="mt-6 px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
         >
           Try again
@@ -234,7 +238,7 @@ function YesState({ earthquake }: { earthquake: EarthquakeFeature }) {
         <span className="mx-2">—</span>
         <span>{location}</span>
       </p>
-      <p className="mt-2 text-lg text-gray-500 animate-slide-up-fade" style={{ animationDelay: "300ms", animationFillMode: "both" }}>{timeAgo}</p>
+      <p className="mt-2 text-lg text-gray-500 animate-slide-up-fade" style={{ animationDelay: "300ms", animationFillMode: "both" }} suppressHydrationWarning>{timeAgo}</p>
     </div>
   );
 }
@@ -253,7 +257,7 @@ function MaybeState({ earthquake }: { earthquake: EarthquakeFeature }) {
         <span className="mx-2">—</span>
         <span>{location}</span>
       </p>
-      <p className="mt-2 text-lg text-gray-500 animate-slide-up-fade" style={{ animationDelay: "300ms", animationFillMode: "both" }}>{timeAgo}</p>
+      <p className="mt-2 text-lg text-gray-500 animate-slide-up-fade" style={{ animationDelay: "300ms", animationFillMode: "both" }} suppressHydrationWarning>{timeAgo}</p>
       <p className="mt-4 text-sm text-gray-400 animate-slide-up-fade" style={{ animationDelay: "450ms", animationFillMode: "both" }}>
         Small quake detected, but you might not have felt it.
       </p>
@@ -292,7 +296,7 @@ function RecentQuakesList({ quakes }: { quakes: EarthquakeFeature[] }) {
             <span className="text-sm text-gray-600">
               M{quake.properties.mag.toFixed(1)} — {extractLocationName(quake.properties.place)}
             </span>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-400" suppressHydrationWarning>
               {getTimeAgo(quake.properties.time)}
             </span>
           </div>
