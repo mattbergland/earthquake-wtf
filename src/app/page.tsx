@@ -1,3 +1,4 @@
+import { preconnect } from "react-dom";
 import EarthquakeStatus from "@/components/EarthquakeStatus";
 import { fetchRecentEarthquakes, determineEarthquakeState } from "@/lib/api";
 
@@ -14,6 +15,7 @@ async function getInitialStatus() {
 }
 
 export default async function Home() {
+  preconnect("https://earthquake.usgs.gov", { crossOrigin: "anonymous" });
   const initialStatus = await getInitialStatus();
   return (
     <main className="flex-1 flex flex-col items-center justify-center pb-20 md:pb-0">
