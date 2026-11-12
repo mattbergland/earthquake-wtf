@@ -55,3 +55,14 @@ before every commit: 0 errors, the same three pre-existing unused `err`
 warnings. No API, fetch/loading timing, readiness strings, navigation
 labels, or `scripts/bench.mjs` changes. Only the two approved baseline JSON
 files are committed; candidate JSON and screenshots remain local.
+
+## Iterations 4–8
+
+| Iteration | Change | Key metrics / verification | Decision |
+| --- | --- | --- | --- |
+| 4 | Restore natural inline-block bubble and edge-aligned caption inside a bottom-anchored reserved box; start entrance/caption animation before paint | Idle CLS stays 0 in two five-run batches; idle dropped/LoAF stay 0; load CLS 0.0013; history/status-nav CLS 0. Short bubble and 358×80px two-line bubble match original geometry. Idle task 201.644/260.039ms, within baseline noise. Leaderboard nav CLS 0.0889 is now repeatable and will be investigated in iteration 8; no leaderboard code changed here. | Kept: visual regression fixed, stability retained. |
+
+Iteration 4 visual evidence, compared directly: `bench/screenshots/perf-bench-{short,long}-mobile.png`
+and `bench/screenshots/iteration-4-{short,long}-mobile.png`. Same bubble width,
+height, padding, wrapping, colors, corners and caption alignment; reserved box
+intentionally keeps the answer stationary instead of following bubble height.

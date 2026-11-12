@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const MESSAGES = [
     { text: "wait... was that an earthquake?", domain: ".wtf" },
@@ -26,6 +26,7 @@ const MESSAGES = [
 export default function AnimatedLogo() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const bubble = useRef<HTMLDivElement>(null);
+  const label = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -34,23 +35,27 @@ export default function AnimatedLogo() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const animation = bubble.current?.animate([
       { opacity: 0, transform: "scale(0.8) translateY(20px)" },
       { transform: "scale(1.02) translateY(-2px)", offset: 0.5 },
       { opacity: 1, transform: "scale(1) translateY(0)" },
     ], { duration: 700, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" });
-    return () => animation?.cancel();
+    const caption = label.current?.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: 500, delay: 300, fill: "both", easing: "ease-out",
+    });
+    return () => { animation?.cancel(); caption?.cancel(); };
   }, [currentIndex]);
 
   const current = MESSAGES[currentIndex];
   const isLol = current.domain === ".lol";
 
   return (
-    <div className="text-center mb-8 w-full max-w-sm h-[108px]">
+    <div className="relative text-center mb-8 w-full max-w-sm h-[108px]">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-max max-w-full">
       <div
         ref={bubble}
-        className={`h-20 flex items-center justify-center px-6 py-3 rounded-2xl rounded-br-md text-lg font-medium shadow-lg ${
+        className={`inline-block px-6 py-3 rounded-2xl rounded-br-md text-lg font-medium shadow-lg ${
           isLol
             ? "bg-gradient-to-br from-green-400 to-green-600 text-white"
             : "bg-gradient-to-br from-blue-400 to-blue-600 text-white"
@@ -58,10 +63,11 @@ export default function AnimatedLogo() {
       >
         {current.text}
       </div>
-      <div className="mt-2 text-right opacity-0 animate-fade-in" style={{ animationDelay: "300ms", animationFillMode: "forwards" }}>
+      <div ref={label} className="mt-2 text-right">
         <span className="text-sm text-gray-400">
-          earthquake<span className={`inline-block w-7 text-left font-semibold ${isLol ? "text-green-500" : "text-blue-500"}`}>{current.domain}</span>
+          earthquake<span className={`font-semibold ${isLol ? "text-green-500" : "text-blue-500"}`}>{current.domain}</span>
         </span>
+      </div>
       </div>
     </div>
   );
