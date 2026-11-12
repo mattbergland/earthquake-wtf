@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import type { EarthquakeStatus } from "@/types/earthquake";
 import { determineEarthquakeState } from "@/lib/api";
-import { loadQuakes, useQuakes } from "@/lib/quakeCache";
+import { loadQuakes, useMarkContentShown, useQuakes } from "@/lib/quakeCache";
 import { triggerVibration } from "@/lib/vibration";
 
 const REFRESH_INTERVAL = 30000;
@@ -56,6 +56,7 @@ export function useEarthquakeStatus() {
   }, [entry]);
 
   const loading = !intro || !status;
+  useMarkContentShown(!loading);
 
   useEffect(() => {
     if (loading || !status?.earthquake) return;

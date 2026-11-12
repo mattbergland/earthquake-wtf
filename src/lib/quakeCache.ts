@@ -96,29 +96,41 @@ type IdleWindow = Window & {
   cancelIdleCallback?: (id: number) => void;
 };
 
-/** Once the current page's own requests settle, warm the data for every tab while idle. */
+let markContentShown: () => void = () => {};
+const contentShown = new Promise<void>((resolve) => {
+  markContentShown = resolve;
+});
+
+/** Pages call this once their real content (not a loading state) is on screen. */
+export function useMarkContentShown(shown: boolean) {
+  useEffect(() => {
+    if (shown) markContentShown();
+  }, [shown]);
+}
+
+/**
+ * After the current page has painted its own content, warm the data for every
+ * tab while idle so later tab switches render from cache instantly.
+ */
 export function usePrefetchAllQuakesWhenIdle() {
   useEffect(() => {
-    const w = window as IdleWindow;
     const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
     if (conn?.saveData) return;
+    const w = window as IdleWindow;
     let cancelled = false;
-    const run = async () => {
-      await Promise.allSettled([...inflight.values()]);
-      if (cancelled) return;
-      (Object.keys(sources) as QuakeKey[]).forEach(prefetchQuakes);
+    const prefetchAll = () => {
+      if (!cancelled) (Object.keys(sources) as QuakeKey[]).forEach(prefetchQuakes);
     };
-    if (w.requestIdleCallback) {
-      const id = w.requestIdleCallback(run, { timeout: 2000 });
-      return () => {
-        cancelled = true;
-        w.cancelIdleCallback?.(id);
-      };
-    }
-    const id = setTimeout(run, 200);
+    contentShown.then(() =>
+      requestAnimationFrame(() =>
+        setTimeout(() => {
+          if (w.requestIdleCallback) w.requestIdleCallback(prefetchAll, { timeout: 1000 });
+          else prefetchAll();
+        }, 0)
+      )
+    );
     return () => {
       cancelled = true;
-      clearTimeout(id);
     };
   }, []);
 }

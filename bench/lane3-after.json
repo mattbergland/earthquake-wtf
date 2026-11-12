@@ -1,0 +1,22 @@
+{
+  "status_ready_ms": 4326.1,
+  "status_fcp_ms": 632,
+  "status_js_kb": 479.2,
+  "history_ready_ms": 2020.2,
+  "history_fcp_ms": 644,
+  "leaderboard_ready_ms": 2119.1,
+  "leaderboard_fcp_ms": 648,
+  "nav_history_ms": 266.4,
+  "nav_leaderboard_ms": 95.1,
+  "nav_status_ms": 76.9,
+  "status_jank_frame_pct": 0,
+  "status_long_anim_frame_ms": 0,
+  "lh_status_lcp_ms": 3483.8,
+  "lh_status_tbt_ms": 90,
+  "lh_status_si_ms": 1607.9,
+  "lh_status_score": 90,
+  "lh_history_lcp_ms": 3356.1,
+  "lh_history_tbt_ms": 119.7,
+  "lh_history_si_ms": 824.8,
+  "lh_history_score": 87
+}
