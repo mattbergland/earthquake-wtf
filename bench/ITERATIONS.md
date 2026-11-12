@@ -61,6 +61,7 @@ files are committed; candidate JSON and screenshots remain local.
 | Iteration | Change | Key metrics / verification | Decision |
 | --- | --- | --- | --- |
 | 4 | Restore natural inline-block bubble and edge-aligned caption inside a bottom-anchored reserved box; start entrance/caption animation before paint | Idle CLS stays 0 in two five-run batches; idle dropped/LoAF stay 0; load CLS 0.0013; history/status-nav CLS 0. Short bubble and 358×80px two-line bubble match original geometry. Idle task 201.644/260.039ms, within baseline noise. Leaderboard nav CLS 0.0889 is now repeatable and will be investigated in iteration 8; no leaderboard code changed here. | Kept: visual regression fixed, stability retained. |
+| 5 | Reduced-motion CSS disables float/wiggle/pulse/bounce and replaces entrance animations with 100ms opacity fades; WAAPI uses 100ms opacity-only fades | Normal idle CLS/dropped/LoAF remain 0; load CLS 0.0013; normal cold-load LoAF 642.5ms, blocking 126.4ms. Reduced-media check: no dot animations, CSS/WAAPI durations ≤100ms, no WAAPI transform keyframes. | Kept for accessibility; normal cold-load scheduling remains noisy (max 166.7ms vs prior 100.1–133.3ms), no persistent idle regression. |
 
 Iteration 4 visual evidence, compared directly: `bench/screenshots/perf-bench-{short,long}-mobile.png`
 and `bench/screenshots/iteration-4-{short,long}-mobile.png`. Same bubble width,

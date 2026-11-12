@@ -123,3 +123,28 @@ body {
 .animate-pulse-slow {
   animation: pulse-slow 2s ease-in-out infinite;
 }
+
+@keyframes reduced-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-bubble-in,
+  .animate-pop-in,
+  .animate-slide-up-fade {
+    animation: reduced-fade 100ms ease-out both !important;
+    animation-delay: 0ms !important;
+  }
+
+  .animate-float,
+  .animate-wiggle,
+  .animate-pulse-slow,
+  .animate-bounce,
+  .animate-pulse {
+    animation: none !important;
+    transform: none;
+    opacity: 1;
+  }
+}

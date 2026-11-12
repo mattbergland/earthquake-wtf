@@ -36,13 +36,14 @@ export default function AnimatedLogo() {
   }, []);
 
   useLayoutEffect(() => {
-    const animation = bubble.current?.animate([
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const animation = bubble.current?.animate(reduced ? [{ opacity: 0 }, { opacity: 1 }] : [
       { opacity: 0, transform: "scale(0.8) translateY(20px)" },
       { transform: "scale(1.02) translateY(-2px)", offset: 0.5 },
       { opacity: 1, transform: "scale(1) translateY(0)" },
-    ], { duration: 700, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" });
+    ], { duration: reduced ? 100 : 700, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" });
     const caption = label.current?.animate([{ opacity: 0 }, { opacity: 1 }], {
-      duration: 500, delay: 300, fill: "both", easing: "ease-out",
+      duration: reduced ? 100 : 500, delay: reduced ? 0 : 300, fill: "both", easing: "ease-out",
     });
     return () => { animation?.cancel(); caption?.cancel(); };
   }, [currentIndex]);
