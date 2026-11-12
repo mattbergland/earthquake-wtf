@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "bench": "node scripts/bench.mjs"
+    "bench": "node scripts/bench.mjs",
+    "smooth": "node scripts/smoothness.mjs"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
